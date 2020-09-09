@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="../css/test_01.css" />
+</head>
+<body>
+    <div id="loading_box">
+        <h1>loading...</h1>
+        <div id="time_box">
+            <h2 id="time_box_date">yyyy-mm-dd</h2>
+            <h2 id="time_box_time">hh:mm:ss</h2>
+        </div>
+    </div>
+
+    <div id="wrapper_all">
+        
+        <div class="child-wrapper" id="wrapper_weather">
+            <div id="weather">
+                <button class="get_button" id="weatherButton">
+                    weather <br />
+                    (날씨)
+                </button>
+            </div>
+        </div>
+
+        <div class="child-wrapper" id="wrapper_menu">
+            <div id="menu">
+                <button class="get_button" id="menuButton">
+                    menu<br />
+                    (급식 메뉴)
+                </button>
+            </div>
+        </div>
+        
+        <div class="child-wrapper" id="wrapper_schedule">
+            <div id="schedule">
+                <button class="get_button" id="scheduleButton">
+                    schedule<br />
+                    (학교일정)
+                </button>
+            </div>
+        </div>
+
+    </div>
+    <!-- <script src="https://code.jquery.com/jquery-2.2.1.js"></script> -->
+    <script>
+        const loadingBox = document.querySelector("#loading_box");
+
+        function showLoading(flag){//인자로 true/false값을 받아 로딩 페이지를 보여줍니다.
+            if(flag){
+                loadingBox.style.top = 0;
+            } else{
+                loadingBox.style.top = "-100%";
+            }
+        }
+
+        function getDate(add=0){// 날짜(쿼리스트링용),년,원,일,요일 객체를 반환합니다.
+            const today = new Date();
+            today.setDate(today.getDate()+add);
+            const y = today.getFullYear();//year
+            const m = today.getMonth()+1<10?"0"+(today.getMonth()+1):today.getMonth()+1;//month
+            const d = today.getDate()<10?"0"+today.getDate():today.getDate();//date
+            const hours = today.getHours(); 
+            const minutes = today.getMinutes();
+            const seconds = today.getSeconds();
+            const day = today.getDay();
+            const output = {
+                queryDate : ""+y+m+d,
+                y:y,
+                m:m,
+                d:d,
+                day:day,
+                hours:hours,
+                minutes:minutes,
+                seconds:seconds,
+            };
+            return output;
+        }
+
+        const time_date = document.querySelector("#time_box_date");
+        const time_time = document.querySelector("#time_box_time");
+
+        const weather = document.querySelector("#weather");
+        const menu = document.querySelector("#menu"); 
+        const schedule = document.querySelector("#schedule");
+
+        let menuNowDate = 0;
+        let scheduleNowDate = 0;
+
+        const weatherUrl = "http://api.openweathermap.org/data/2.5/weather?q=daegu&APPID=09c8dfc52b7541d33c528d09a55e2c18&units=metric";
+        const menuUrl = `http://kyungwon-server.kro.kr:8080/meals?school_id=7240393&office_code=D10&date=`;
+        const scheduleUrl = `http://kyungwon-server.kro.kr:8080/schedule?school_id=7240393&office_code=D10&date=`;
+
+        const weatherButton = document.querySelector("#weatherButton");
+        const menuButton = document.querySelector("#menuButton");
+        const scheduleButton = document.querySelector("#scheduleButton");
+
+        var xhr= new XMLHttpRequest();
+
+    function get(url,callback){// 받은 url의 결과를  callback함수에 인자를 넣습니다. 
+        showLoading(true);
+        xhr. onreadystatechange = function(){
+            if(xhr.readyState===4){
+                let res = xhr.responseText;
+                callback(res);
+            }
+        }
+        xhr.open("GET",url); 
+        xhr.send(); 
+    }
+
+    function getDay(day){//숫자에 맞는 요일을 반환합니다.
+    // console.log("day :",day)
+    // day %= 7;
+    // if(day < 0) day = day+7;
+    // console.log(day);
+        switch(day){
+            case 0:return '일';
+            case 1:return '월';
+            case 2:return '화';
+            case 3:return '수';
+            case 4:return '목';
+            case 5:return '금';
+            case 6:return '토';
+        }
+    }
+
+    function getWeather(){//날씨api를 받아와 출력합니다.
+        get(weatherUrl,(res)=>{
+            let obj = JSON.parse(res);
+            // console.log(obj.main,obj.weather[0]);
+            let temp  = obj.main;
+            let _weather = obj.weather[0];
+            let output = {
+                temp:temp["temp"],
+                temp_min:temp["temp_min"],
+                temp_max:temp["temp_max"],
+                feel:temp["feels_like"],
+                humidity:temp["humidity"],
+                weather:_weather["main"],
+                desc:_weather["description"],
+                icon:_weather["icon"]+"@2x.png"
+                }
+                console.log(output);
+            let tag = "<h1>오늘 날씨</h1> <hr /><ul>";
+            // for(let i in output){
+            //     tag += `<li> ${i} : ${output[i]} </li> `;
+            // }
+            tag += `
+            <li>온도 : ${output.temp}도</li>
+            <li>체감온도 : ${output.feel}도</li>
+            <li>습도 : ${output.humidity}%</li>
+            <li>날씨 : ${output.weather}</li>
+            <input type="checkbox" id="detail_checkBox"/><br />
+
+            <label for="detail_checkBox"></label>
+            <div id="weather_detail_box">
+                <li>최대온도 : ${output.temp_max}도</li>
+                <li>최저온도 : ${output.temp_min}도</li>
+                <li>날씨정보 : ${output.desc}</li>
+            </div>
+            `
+            tag += `</ul> <hr /> <div id="icon_img_wrapper"><img id="icon_img" src="../imgs/${output.icon}" /></div> <a target='_blank' href='https://www.weather.go.kr/w/index.do'>기상청 바로가기</a>`;
+            showLoading(false);
+            weather.innerHTML = tag;
+        })
+    }
+
+    function getkindMeal(i){//식사 종류를 반환합니다.
+        switch(i){
+            case "0":return "<h2>아침</h2>";
+            case "1":return "<h2>점심</h2>";
+            case "2":return "<h2>저녁</h2>";
+        }
+    }
+    
+    function changeDate(flag,mode){//급식,일정의 날짜를 변경합니다.
+        switch(mode){
+            case "menu":{
+                if(flag){//true
+                    ++menuNowDate;
+                    getMenu(menuNowDate);
+                } else{//false
+                    --menuNowDate;
+                    getMenu(menuNowDate);
+                }
+            } break;
+            case "schedule":{
+                if(flag){//true
+                    ++scheduleNowDate;
+                    getSchedule(scheduleNowDate);
+                } else{//false
+                    --scheduleNowDate;
+                    getSchedule(scheduleNowDate);
+                }
+            } break;
+
+        }
+    }
+
+    function getNowMeal(nowHour){//지금 시각이 어떤 급식(아침,점심,저녁)을 먹어야하는지 반환합니다.
+        if(nowHour<8) return 0;//아침
+        else if(nowHour<13) return 1;//점심
+        else return 2;//저녁
+    }
+
+    function getMenu(add = 0){//급식api를 받아와 출력합니다.
+                // 아침: 8:00 미만
+                // 점심: 13:0 미만
+                // 저녁: 19:00 미만
+        let date = getDate(add);
+        let url = menuUrl + date.queryDate;
+        get(url,(res)=>{
+            let obj = JSON.parse(res);
+            // console.log(obj.data);
+            let output = `
+            <h1>급식</h1>
+            <p>${date.m}월 ${date.d}일 ${getDay(date.day)}요일</p>
+            <hr />
+            `;
+            try{
+                let arr = obj.data.meals;
+                for(let i in arr){
+                    output += `
+                    <div class="meal_box ${((getNowMeal(date.hours)+"")===i&&add===0)?"now":"not_now"}">
+                        ${getkindMeal(i)}
+                        ${(arr[i]===null?"급식정보가 없습니다.":arr[i])}
+                        <hr />
+                    </div>`;
+                }
+            } catch{
+                output += "<h3>급식 정보가 없습니다.</h3>"
+            }
+           output += `
+           <div class="change_date_button_box">
+                <button onclick="changeDate(false,'menu')"><</button>
+                <button onclick="changeDate(true,'menu')">></button>
+           </div>
+           `;
+           console.log(menuNowDate)
+            showLoading(false);
+            menu.innerHTML = output;
+        })
+    }
+
+    function getSchedule(add=0){//일정api를 받아와 출력합니다.
+        let date = getDate(add);
+        let url = scheduleUrl + date.queryDate;
+        get(url,(res)=>{
+            // console.log(res);
+            let obj = JSON.parse(res);
+            let tag = `
+            <h1>일정</h1>
+            <p>${date.m}월 ${date.d}일 ${getDay(date.day)}요일</p>
+            <hr />
+            `;
+            try{
+                let arr = obj.data.schedules;
+                for(let i in arr){
+                    let schedule = arr[i];
+                    tag += ` ${schedule.name}`;
+                }
+            } catch{
+                tag += "<h3>일정이 없습니다.</h3>"
+            }
+            tag += `
+           <div class="change_date_button_box">
+                <button onclick="changeDate(false,'schedule')"><</button>
+                <button onclick="changeDate(true,'schedule')">></button>
+           </div>
+           `;
+            showLoading(false);
+            schedule.innerHTML = tag;
+        });
+    }
+
+    weatherButton.addEventListener("click",e=>{
+        getWeather();
+    });
+    menuButton.addEventListener("click",e=>{
+        getMenu();
+    });
+    scheduleButton.addEventListener("click",e=>{
+        getSchedule();
+    });
+
+    function setTime(){
+        const time = getDate();
+        const _date = time.y+":"+time.m+":"+time.d+"("+getDay(time.day)+")";
+        const _time = time.hours+":"+time.minutes+":"+time.seconds;
+        time_date.innerText = _date;
+        time_time.innerText = _time;
+    }
+
+    setInterval(setTime,1000);
+
+    </script>
+</body>
+</html>

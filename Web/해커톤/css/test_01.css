@@ -1,0 +1,57 @@
+*{margin:0;padding:0;box-sizing:border-box;}
+li,ul{list-style:none;}
+a{text-decoration:none;color:darkblue;font-weight:bold;}
+/* rayout */
+
+#wrapper_all{display:flex;border:1px solid black;width:1000px;height:100vh;margin:0 auto;}
+#wrapper_all .child-wrapper{flex-grow:1;border:1px solid black;height:100%;}
+#wrapper_all .child-wrapper>div{height:100%;text-align:center;margin:10px;}
+#wrapper_weather{}
+#wrapper_menu{}
+#wrapper_schedule{}
+
+/* button 처음 api를 불러오는 버튼입니다. */
+.get_button{
+    display:block;
+    width:100%;
+    height:95%;
+    border:none;
+    background-color:white;
+}
+
+/* loading_box */
+#loading_box{color:white;background-color:rgba(0,0,0,0.8);position:fixed;top:-100%;width:100vw;height:100vh;transition:all .15s;}
+#loading_box h1{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);}
+
+/* button setting */
+button{font-size:2rem;border:none;background-color:white;}
+/* hr setting */
+hr{margin:10px;}
+
+/* chanage_date_button_box */
+.change_date_button_box{}
+.change_date_button_box button{margin:10px;transition:all .55s;border-radius:3px;padding:3px;}
+.change_date_button_box button:hover{background-color:rgba(0,0,0,0.1);}
+
+/* menu_box */
+.meal_box{padding:10px;}
+.now {background-color:rgba(0,0,0,0.8);color:white;}
+.not_now{}
+
+/* time_box */
+#time_box{position:fixed;width:250px;height:130px;border:3px solid white;right:20px;bottom:20px;color:white;}
+#time_box>h2{text-align:center;line-height:65px;}
+#time_box #time_box_date{font-size:2rem;}
+#time_box #time_box_time{font-size:1.8rem;}
+
+/* icon_img */
+#icon_img_wrapper{text-align:center;margin:30px;}
+#icon_img{border:1px solid black;border-radius:4px;}
+
+/* detail_checkBox - weather */
+#detail_checkBox{display:none;}
+#detail_checkBox~#weather_detail_box{height:0;overflow:hidden;transition:all .25s;margin-top:10px;}
+#detail_checkBox~label{cursor:pointer;}
+#detail_checkBox~label::after{content:"자세히 보기";color:darkblue;font-weight:bold;}
+#detail_checkBox:checked~label::after{content:"자세히 보기 닫기"}
+#detail_checkBox:checked~#weather_detail_box{height:90px;}
